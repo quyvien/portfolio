@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Portfolio browser checks</title><style>body{margin:0;font:14px monospace;background:#eee}iframe{border:0;display:block}pre{white-space:pre-wrap;padding:16px}body.preview pre{display:none}</style><iframe title="Portfolio under test" height="1050"></iframe><pre id="results">Running…</pre><script>
+(async () => {
+ const params=new URLSearchParams(location.search), frame=document.querySelector('iframe'), results=[];
+ const pause=ms=>new Promise(r=>setTimeout(r,ms));
+ const check=(name,pass)=>{results.push({name,pass:!!pass});document.querySelector('#results').textContent=JSON.stringify(results,null,2)};
+ const load=async()=>{await new Promise(resolve=>{frame.onload=resolve;frame.src='/index.html?test='+Math.random()});await pause(100)};
+ if(params.has('preview')){
+  document.body.classList.add('preview');localStorage.setItem('portfolio-theme',params.get('theme')||'light');frame.width=params.get('width')||'390';frame.height=params.get('height')||'2400';await load();if(params.get('section'))frame.contentDocument.getElementById(params.get('section')).scrollIntoView({behavior:'instant'});return;
+ }
+ localStorage.removeItem('portfolio-theme');frame.width=1440;await load();
+ let doc=frame.contentDocument,win=frame.contentWindow;
+ check('First visit follows system theme',doc.documentElement.dataset.theme===(win.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+ const first=doc.documentElement.dataset.theme;doc.querySelector('.theme-toggle').click();const selected=doc.documentElement.dataset.theme;
+ check('Theme toggle changes theme and accessible label',selected!==first&&doc.querySelector('.theme-toggle').getAttribute('aria-label').includes(first));
+ await load();doc=frame.contentDocument;win=frame.contentWindow;
+ check('Theme persists after reload',doc.documentElement.dataset.theme===selected);
+ const menu=doc.querySelector('#site-menu'),toggle=doc.querySelector('.menu-toggle');
+ toggle.click();await pause(100);
+ check('Menu opens as an accessible modal',menu.open&&toggle.getAttribute('aria-expanded')==='true'&&doc.body.classList.contains('menu-open'));
+ menu.querySelector('.menu-close').click();await pause(100);
+ check('Menu closes and restores focus',!menu.open&&toggle.getAttribute('aria-expanded')==='false'&&doc.activeElement===toggle&&!doc.body.classList.contains('menu-open'));
+ toggle.click();menu.dispatchEvent(new Event('cancel',{cancelable:true}));await pause(100);
+ check('Escape dismissal restores page interaction',!menu.open&&!doc.body.classList.contains('menu-open'));
+ toggle.click();menu.querySelector('a[href="#about"]').click();await pause(200);
+ check('Menu navigation closes overlay and focuses destination',!menu.open&&win.location.hash==='#about'&&doc.activeElement===doc.querySelector('#about'));
+ for(const width of [320,375,390,768,1024,1440]){
+  frame.width=width;await pause(100);
+  check('No page overflow at '+width+'px',doc.documentElement.scrollWidth<=doc.documentElement.clientWidth);
+  const lines=[...doc.querySelectorAll('.type-line')];
+  check('Typography fits at '+width+'px',lines.every(n=>n.scrollWidth<=n.clientWidth+1));
+  check('Header fits at '+width+'px',doc.querySelector('.site-header').scrollWidth<=doc.querySelector('.site-header').clientWidth);
+ }
+ frame.width=390;await pause(100);
+ check('All navigation targets exist',[...doc.querySelectorAll('a[href^="#"]')].every(a=>doc.querySelector(a.getAttribute('href'))));
+ doc.querySelector('.project-index a').click();await pause(300);
+ check('Project index navigates to first project',win.location.hash==='#project-01');
+ doc.querySelector('nav a[href="#projects"]').click();await pause(1000);
+ check('Projects navigation works',win.location.hash==='#projects');
+ check('All supplied SVG images load',[...doc.images].every(n=>n.complete&&n.naturalWidth>0));
+ check('Missing hero video keeps poster and hides control',doc.querySelector('#hero-video').hidden&&doc.querySelector('#video-control').hidden&&doc.querySelector('#hero-poster').naturalWidth>0);
+ check('Contact placeholders are not dead links',doc.querySelectorAll('.contact-placeholder').length===3&&doc.querySelectorAll('.contact-links a').length===0);
+ const feature=doc.querySelector('.typography-feature');feature.scrollIntoView({behavior:'instant'});await pause(1600);
+ check('Typography reveals on entry',!feature.classList.contains('is-ready')||feature.classList.contains('is-visible'));
+ doc.querySelector('#home').scrollIntoView({behavior:'instant'});await pause(500);feature.scrollIntoView({behavior:'instant'});await pause(200);
+ check('Typography stays revealed after repeat entry',!feature.classList.contains('is-ready')||feature.classList.contains('is-visible'));
+ if(win.matchMedia('(prefers-reduced-motion: reduce)').matches){check('Reduced motion has no sliding',win.getComputedStyle(doc.querySelector('.type-line')).transform==='none');}
+ const source=await(await fetch('/index.html')).text();
+ const broken=source.replace('<head>','<head><base href="/">').replace('<script src="content.js" defer><\/script>','<script>window.PORTFOLIO={hero:{video:"assets/missing-video.mp4",poster:"assets/missing-poster.jpg"}};<\/script>');
+ await new Promise(resolve=>{frame.onload=resolve;frame.srcdoc=broken});await pause(1500);doc=frame.contentDocument;
+ check('Broken video keeps static fallback',doc.querySelector('#hero-video').hidden&&doc.querySelector('#video-control').hidden);
+ check('Broken custom poster uses built-in fallback',doc.querySelector('#hero-poster').naturalWidth>0&&doc.querySelector('#hero-poster').getAttribute('src')==='assets/hero-poster.svg');
+ const summary={passed:results.filter(r=>r.pass).length,failed:results.filter(r=>!r.pass).length,results};
+ document.querySelector('#results').textContent=JSON.stringify(summary,null,2);document.title=summary.failed?'FAIL':'PASS';frame.remove();
+})().catch(error=>{document.title='ERROR';document.querySelector('#results').textContent=error.stack});
+</script></html>

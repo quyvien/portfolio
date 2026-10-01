@@ -1,0 +1,4 @@
+.browser-test*/
+preview-*.png
+tests/results-*.html
+tests/chrome*.log
