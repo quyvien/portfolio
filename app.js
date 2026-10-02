@@ -7,7 +7,7 @@
     const value = config[node.dataset.content];
     if (typeof value === 'string' && value.trim()) node.textContent = value;
   });
-  document.title = `${config.name || '[YOUR NAME]'} — People, business & technology`;
+  document.title = `${config.name || 'Quy Vien'} — Aspiring Software Engineer`;
   document.querySelector('#year').textContent = new Date().getFullYear();
   const menu = document.querySelector('#site-menu');
   const menuToggle = document.querySelector('.menu-toggle');
@@ -90,7 +90,7 @@
     const link = document.createElement('a');
     link.href = url;
     link.textContent = kind === 'email' ? `${value} ↗` : `Visit ${kind === 'github' ? 'GitHub' : 'LinkedIn'} ↗`;
-    row.querySelector('.contact-placeholder').replaceWith(link);
+    row.querySelector('.contact-placeholder, a').replaceWith(link);
   }
   (config.projects || []).forEach((project, index) => {
     const article = document.querySelector(`[data-project="${index}"]`);

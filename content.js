@@ -1,20 +1,17 @@
-// Edit personal content here. Leave missing facts clearly marked until verified.
+// Keep HTML defaults in sync for visitors without JavaScript.
 window.PORTFOLIO = {
-  name: 'Tsần Quý Viên',
-  intro: 'BUILDING FAST, CLEAN WEB APPS FOR REAL USERS.',
-  featureFirst: 'Understanding people.',
-  featureSecond: 'Building with technology.',
-  // Add chapterOne / chapterOneDetail, chapterTwo / chapterTwoDetail,
-  // chapterThree / chapterThreeDetail, or contactIntro to override the HTML copy.
-  hero: {
-    video: '', // e.g. 'assets/intro.mp4'; muted, looping, inline, with pause control.
-    poster: 'assets/tsan-quy-vien.jpg',
-    posterAlt: 'Portrait of Tsần Quý Viên'
+  "name": "Quy Vien",
+  "intro": "Third-year Information Technology student aspiring to become a Software Engineer. I enjoy building practical software projects, learning new technologies, and improving my development skills through university projects and self-learning.",
+  "featureFirst": "Learning by building.",
+  "featureSecond": "Developing with purpose.",
+  "hero": {
+    "video": "",
+    "poster": "assets/tsan-quy-vien.jpg",
+    "posterAlt": "Portrait of Quy Vien"
   },
-  contact: { email: '', linkedin: '', github: '' },
-  // Fill either project object below. Omitted fields retain marked placeholders.
-  // title, summary, problem, contribution, approach, learning: plain text.
-  // image: local asset path; imageAlt: descriptive text; video: optional local video.
-  // links: [{ label: 'View repository', url: 'https://github.com/...' }]
-  projects: [{}, {}]
+  "contact": {
+    "email": "quyviensv1@gmail.com",
+    "github": "https://github.com/quyvien"
+  },
+  "projects": []
 };

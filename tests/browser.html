@@ -38,7 +38,7 @@
  check('Projects navigation works',win.location.hash==='#projects');
  check('All supplied SVG images load',[...doc.images].every(n=>n.complete&&n.naturalWidth>0));
  check('Missing hero video keeps poster and hides control',doc.querySelector('#hero-video').hidden&&doc.querySelector('#video-control').hidden&&doc.querySelector('#hero-poster').naturalWidth>0);
- check('Contact placeholders are not dead links',doc.querySelectorAll('.contact-placeholder').length===3&&doc.querySelectorAll('.contact-links a').length===0);
+ check('Contact links match supplied details',doc.querySelector('[data-contact="email"] a').getAttribute('href')==='mailto:quyviensv1@gmail.com'&&doc.querySelector('[data-contact="github"] a').href==='https://github.com/quyvien'&&doc.querySelectorAll('.contact-placeholder').length===0);
  const feature=doc.querySelector('.typography-feature');feature.scrollIntoView({behavior:'instant'});await pause(1600);
  check('Typography reveals on entry',!feature.classList.contains('is-ready')||feature.classList.contains('is-visible'));
  doc.querySelector('#home').scrollIntoView({behavior:'instant'});await pause(500);feature.scrollIntoView({behavior:'instant'});await pause(200);
