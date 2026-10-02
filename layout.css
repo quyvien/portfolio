@@ -63,3 +63,16 @@ h1,h2,h3,.hero-name,.footer-name,.chapter-number,.chapter-aside>p,.process-note>
 .site-header .menu-toggle span{width:25px;height:2px}
 @media(max-width:700px){.site-header{gap:10px}.site-header .wordmark{font-size:16px}.header-actions{gap:8px}.header-pill{min-height:36px;padding:7px 9px}.header-pill span{display:none}.site-header .theme-toggle{margin-left:0}.site-header .menu-toggle{margin-left:0;width:36px}.site-header .menu-toggle span{width:23px}}
 @media(max-width:370px){.site-header{gap:7px}.site-header .wordmark{font-size:15px}.header-actions{gap:6px}.header-pill{padding:7px}.site-header .theme-toggle{width:38px;height:40px}}
+/* Ảnh tham gia HUFLIT Mentoring và thông tin chứng nhận. */
+.mentoring{border-top:1px solid var(--line)}
+.mentoring-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-top:42px}
+.mentoring-photo-main{grid-column:1/-1}
+.mentoring-photo a{display:block;background:var(--panel)}
+.mentoring-photo img{width:100%;height:auto;aspect-ratio:16/9}
+.mentoring-photo figcaption{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:12px;font-size:10px;line-height:1.6;letter-spacing:.06em;color:var(--muted)}
+.mentoring-certificate{display:flex;justify-content:space-between;align-items:center;gap:32px;margin-top:40px;padding:28px;border:1px solid var(--line);background:var(--panel)}
+.mentoring-certificate h3{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em;margin:12px 0}
+.mentoring-certificate p{font-size:12px;line-height:1.8;max-width:52ch}
+.mentoring-certificate-note{color:var(--muted);max-width:24ch!important}
+#site-menu{overflow-y:auto}
+@media(max-width:700px){.mentoring-gallery{grid-template-columns:1fr;gap:24px;margin-top:28px}.mentoring-certificate{align-items:flex-start;flex-direction:column;gap:18px;padding:22px;margin-top:28px}.mentoring-photo figcaption{font-size:9px}.overlay-nav a{font-size:clamp(30px,8.8vw,60px);min-height:68px}.desktop-nav{flex-wrap:wrap;gap:2px 10px}}
