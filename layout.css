@@ -68,7 +68,7 @@ h1,h2,h3,.hero-name,.footer-name,.chapter-number,.chapter-aside>p,.process-note>
 .mentoring-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-top:42px}
 .mentoring-photo-main{grid-column:1/-1}
 .mentoring-photo a{display:block;background:var(--panel)}
-.mentoring-photo img{width:100%;height:auto;aspect-ratio:16/9}
+.mentoring-photo img{width:100%;height:auto;aspect-ratio:auto}
 .mentoring-photo figcaption{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:12px;font-size:10px;line-height:1.6;letter-spacing:.06em;color:var(--muted)}
 .mentoring-certificate{display:flex;justify-content:space-between;align-items:center;gap:32px;margin-top:40px;padding:28px;border:1px solid var(--line);background:var(--panel)}
 .mentoring-certificate h3{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em;margin:12px 0}
