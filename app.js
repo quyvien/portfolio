@@ -62,19 +62,6 @@
   });
   color.addEventListener('change', event => { if (!['light', 'dark'].includes(chosenTheme)) setTheme(event.matches ? 'dark' : 'light'); });
 
-  const feature = document.querySelector('.typography-feature');
-  let observer;
-  if (!motion.matches && 'IntersectionObserver' in window) {
-    feature.classList.add('is-ready');
-    observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) {
-        feature.classList.add('is-visible');
-        observer.disconnect();
-      }
-    }, { threshold: 0.25 });
-    observer.observe(feature);
-  }
-
   const safeURL = (value, email = false) => {
     if (typeof value !== 'string' || !value.trim()) return null;
     try {
@@ -171,7 +158,6 @@
   });
   motion.addEventListener('change', () => {
     if (motion.matches) {
-      feature.classList.add('is-visible'); observer?.disconnect();
       fallback('01 / STILL FRAME');
     } else if (!userPaused) startVideo();
   });

@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Running motion checks</title>
+<style>body{margin:0}iframe{width:100%;height:900px;border:0}pre{white-space:pre-wrap}</style>
+<iframe title="Motion test"></iframe><pre id="results"></pre><script>
+(async () => {
+  const frame = document.querySelector('iframe'), results = [];
+  const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const check = (name, pass) => results.push({ name, pass: !!pass });
+  await new Promise(resolve => { frame.onload = resolve; frame.src = '/'; });
+  const win = frame.contentWindow, doc = frame.contentDocument;
+  const reduced = win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  await pause(1400);
+  check('Motion mode follows OS preference', doc.documentElement.classList.contains('motion-enabled') !== reduced);
+  const feature = doc.querySelector('.typography-feature'), lines = [...feature.querySelectorAll('.type-line')];
+  win.scrollTo({ top: feature.offsetTop - 400, behavior: 'instant' }); await pause(150);
+  const first = win.getComputedStyle(lines[0]).transform;
+  win.scrollBy({ top: 200, behavior: 'instant' }); await pause(150);
+  const second = win.getComputedStyle(lines[0]).transform;
+  check('Typography follows scrolling or stays static for reduced motion', reduced ? second === 'none' : first !== second);
+  if (!reduced) {
+    const a = new DOMMatrix(second), b = new DOMMatrix(win.getComputedStyle(lines[1]).transform);
+    check('Two typography lines move in opposing directions', Math.abs(a.m41 + b.m41) < .1);
+  }
+  const visual = doc.querySelector('.project-visual');
+  visual.scrollIntoView({ behavior: 'instant', block: 'center' }); await pause(1200);
+  check('Project image remains visible', visual.querySelector('img').naturalWidth > 0 && win.getComputedStyle(visual).opacity === '1');
+  check('Reduced motion disables image transforms', !reduced || win.getComputedStyle(visual.querySelector('img')).transform === 'none');
+  doc.querySelector('.menu-toggle').click(); await pause(700);
+  check('Menu animation settles with all links visible', [...doc.querySelectorAll('.overlay-nav a')].every(node => win.getComputedStyle(node).opacity === '1'));
+  doc.querySelector('.menu-close').click();
+  check('No lingering entrance animations', doc.getAnimations().filter(animation => animation.playState === 'running').length === 0);
+  const source = await (await fetch('/')).text();
+  await new Promise(resolve => {
+    frame.onload = resolve;
+    frame.srcdoc = source.replace('<head>', '<head><base href="/">').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+  });
+  const staticDoc = frame.contentDocument;
+  check('Without JavaScript, headings and projects remain visible', ['#hero-heading', '#perspective-heading', '.project-body'].every(selector => frame.contentWindow.getComputedStyle(staticDoc.querySelector(selector)).opacity === '1'));
+  const summary = { passed: results.filter(r => r.pass).length, failed: results.filter(r => !r.pass).length, results };
+  document.querySelector('#results').textContent = JSON.stringify(summary, null, 2);
+  document.title = summary.failed ? 'FAIL' : 'PASS'; frame.remove();
+})().catch(error => { document.title = 'ERROR'; document.querySelector('#results').textContent = error.stack; });
+</script></html>

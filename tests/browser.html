@@ -36,7 +36,9 @@
  check('Project index navigates to first project',win.location.hash==='#project-01');
  doc.querySelector('nav a[href="#projects"]').click();await pause(1000);
  check('Projects navigation works',win.location.hash==='#projects');
- check('All supplied SVG images load',[...doc.images].every(n=>n.complete&&n.naturalWidth>0));
+ // Explicitly load lazy gallery images before asserting their availability.
+ await Promise.all([...doc.images].map(async image=>{image.loading='eager';try{await image.decode()}catch{}}));
+ check('All supplied images load',[...doc.images].every(n=>n.complete&&n.naturalWidth>0));
  check('Missing hero video keeps poster and hides control',doc.querySelector('#hero-video').hidden&&doc.querySelector('#video-control').hidden&&doc.querySelector('#hero-poster').naturalWidth>0);
  check('Contact links match supplied details',doc.querySelector('[data-contact="email"] a').getAttribute('href')==='mailto:quyviensv1@gmail.com'&&doc.querySelector('[data-contact="github"] a').href==='https://github.com/quyvien'&&doc.querySelectorAll('.contact-placeholder').length===0);
  const feature=doc.querySelector('.typography-feature');feature.scrollIntoView({behavior:'instant'});await pause(1600);
