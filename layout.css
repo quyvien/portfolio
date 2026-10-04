@@ -76,3 +76,22 @@ h1,h2,h3,.hero-name,.footer-name,.chapter-number,.chapter-aside>p,.process-note>
 .mentoring-certificate-note{color:var(--muted);max-width:24ch!important}
 #site-menu{overflow-y:auto}
 @media(max-width:700px){.mentoring-gallery{grid-template-columns:1fr;gap:24px;margin-top:28px}.mentoring-certificate{align-items:flex-start;flex-direction:column;gap:18px;padding:22px;margin-top:28px}.mentoring-photo figcaption{font-size:9px}.overlay-nav a{font-size:clamp(30px,8.8vw,60px);min-height:68px}.desktop-nav{flex-wrap:wrap;gap:2px 10px}}
+/* Compact introduction and portrait crop. */
+.hero{padding-top:84px}
+.hero-layout{row-gap:16px}
+.hero-tags{margin-top:12px}
+.hero-direction{margin-top:16px}
+.hero-name{margin-top:auto;padding-top:20px}
+.hero-application{margin-top:12px}
+.hero-media{width:min(100%,400px);aspect-ratio:6 / 5}
+.hero-portrait{position:absolute;inset:0;overflow:hidden}.hero-portrait>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 40%;transform:scale(1.5);transform-origin:center 31%}
+.hero-intro{align-self:center}
+.hero-foot{margin-top:48px;padding-bottom:28px}
+@media(max-width:700px){
+  .hero{padding-top:72px}
+  .hero-layout{row-gap:16px}
+  .hero-direction{margin-top:0}
+  .hero-media{width:min(100%,360px);aspect-ratio:6 / 5}
+  .hero-portrait>img{object-position:center 40%}
+  .hero-foot{margin-top:28px}
+}
