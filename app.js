@@ -62,6 +62,31 @@
   });
   color.addEventListener('change', event => { if (!['light', 'dark'].includes(chosenTheme)) setTheme(event.matches ? 'dark' : 'light'); });
 
+  // Keep the compact header useful on long pages and expose the current
+  // chapter without turning the navigation into a separate visual system.
+  const sectionLinks = [...document.querySelectorAll('.desktop-nav a[href^="#"], .overlay-nav a[href^="#"]')];
+  const linkedSections = sectionLinks
+    .map(link => ({ link, section: document.querySelector(link.getAttribute('href')) }))
+    .filter(item => item.section);
+  if ('IntersectionObserver' in window && linkedSections.length) {
+    const visibleSections = new Map();
+    const updateCurrentSection = () => {
+      const current = [...visibleSections.entries()]
+        .filter(([, visible]) => visible)
+        .map(([section]) => section)
+        .sort((a, b) => Math.abs(a.getBoundingClientRect().top - 100) - Math.abs(b.getBoundingClientRect().top - 100))[0];
+      linkedSections.forEach(({ link, section }) => {
+        if (section === current) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    };
+    const sectionObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => visibleSections.set(entry.target, entry.isIntersecting));
+      updateCurrentSection();
+    }, { rootMargin: '-18% 0px -62% 0px', threshold: 0 });
+    linkedSections.forEach(({ section }) => sectionObserver.observe(section));
+  }
+
   const safeURL = (value, email = false) => {
     if (typeof value !== 'string' || !value.trim()) return null;
     try {
