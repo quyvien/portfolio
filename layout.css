@@ -203,6 +203,50 @@ h1,h2,h3,.hero-name,.footer-name,.chapter-number,.chapter-aside>p,.process-note>
   background:color-mix(in srgb,var(--accent) 8%,var(--panel));
   transform:rotate(3deg) scale(1.035)
 }
+.tech-list{
+  list-style:none;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px 22px;
+  margin:0;
+  padding:0;
+  max-width:620px
+}
+.tech-list li{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  min-height:30px;
+  color:var(--muted);
+  font:10px var(--font-mono);
+  letter-spacing:.055em;
+  white-space:nowrap
+}
+.tech-mark{
+  --tech:#7c8175;
+  width:30px;
+  height:30px;
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 auto;
+  color:var(--tech);
+  background:color-mix(in srgb,var(--tech) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--tech) 58%,var(--line));
+  border-radius:7px;
+  font-family:var(--font-ui);
+  font-size:10px;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:-.03em;
+  transition:transform .25s ease,background-color .25s ease
+}
+.tech-list li:hover .tech-mark{transform:translateY(-2px);background:color-mix(in srgb,var(--tech) 20%,transparent)}
+.csharp{--tech:#9b4fca}.sql,.sqlserver,.dbeaver{--tech:#2580a8}.kotlin{--tech:#a95ee7}
+.dotnet,.visualstudio{--tech:#7b55c7}.html,.git{--tech:#ef5a36}.css,.vscode{--tech:#268bd2}.javascript{--tech:#c6a500}
+.oracle{--tech:#e8493e}.plsql{--tech:#d87d29}.redis{--tech:#d9433d}.firebase{--tech:#efa51c}
+.oop,.mvc,.rest,.design,.analysis,.engineering{--tech:var(--accent)}
+.github{--tech:#70756d}.android{--tech:#4fae55}.staruml{--tech:#e36d32}.plantuml{--tech:#8b6748}.mermaid{--tech:#c04d7c}
+.tech-list-concepts li{white-space:normal}
 
 .projects{background:color-mix(in srgb,var(--paper) 94%,var(--panel))}
 .project-visual{
@@ -280,11 +324,15 @@ h1,h2,h3,.hero-name,.footer-name,.chapter-number,.chapter-aside>p,.process-note>
     justify-self:start;
     margin-top:-7px
   }
+  .tech-list{gap:10px 16px}
+  .tech-list li{font-size:9px}
+  .tech-mark{width:28px;height:28px;font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){
   .site-header,.desktop-nav a::after,.hero-links a,.hero-media,.project-visual,
   .project-visual::after,.project-visual>img,.mentoring-photo a,.mentoring-photo img,
-  .contact-links a,.contact h2>span,.skill-icon{transition:none!important}
+  .contact-links a,.contact h2>span,.skill-icon,.tech-mark{transition:none!important}
   .hero-links a:hover,.contact-links a:hover,.contact:hover h2>span{transform:none!important}
   .skill-chapter:hover .skill-icon{transform:none!important}
+  .tech-list li:hover .tech-mark{transform:none!important}
 }
