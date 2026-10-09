@@ -163,6 +163,47 @@ h1,h2,h3,.hero-name,.footer-name,.chapter-number,.chapter-aside>p,.process-note>
 }
 .chapter:hover{border-color:var(--accent)}
 
+/* Custom line icons for the five technical skill groups. */
+.skill-icon{
+  width:clamp(86px,8vw,116px);
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  justify-self:end;
+  align-self:start;
+  color:var(--ink);
+  background:color-mix(in srgb,var(--panel) 74%,transparent);
+  border:1px solid var(--line);
+  border-radius:50%;
+  position:relative;
+  transition:color .3s ease,border-color .3s ease,transform .35s cubic-bezier(.22,1,.36,1),background-color .3s ease
+}
+.skill-icon::after{
+  content:"";
+  width:7px;
+  aspect-ratio:1;
+  border-radius:50%;
+  position:absolute;
+  right:12%;
+  top:12%;
+  background:var(--accent)
+}
+.skill-icon svg{
+  width:56%;
+  height:56%;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round
+}
+.skill-chapter:hover .skill-icon{
+  color:var(--accent);
+  border-color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 8%,var(--panel));
+  transform:rotate(3deg) scale(1.035)
+}
+
 .projects{background:color-mix(in srgb,var(--paper) 94%,var(--panel))}
 .project-visual{
   background:var(--panel);
@@ -233,10 +274,17 @@ h1,h2,h3,.hero-name,.footer-name,.chapter-number,.chapter-aside>p,.process-note>
   .project-summary{font-size:13px}
   .project-title h3{font-size:28px}
   .mentoring-photo a:hover img{transform:none}
+  .skill-icon{
+    grid-column:2;
+    width:72px;
+    justify-self:start;
+    margin-top:-7px
+  }
 }
 @media(prefers-reduced-motion:reduce){
   .site-header,.desktop-nav a::after,.hero-links a,.hero-media,.project-visual,
   .project-visual::after,.project-visual>img,.mentoring-photo a,.mentoring-photo img,
-  .contact-links a,.contact h2>span{transition:none!important}
+  .contact-links a,.contact h2>span,.skill-icon{transition:none!important}
   .hero-links a:hover,.contact-links a:hover,.contact:hover h2>span{transform:none!important}
+  .skill-chapter:hover .skill-icon{transform:none!important}
 }
