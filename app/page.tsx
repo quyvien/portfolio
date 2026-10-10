@@ -7,6 +7,10 @@ import { mentoringPhotos, portfolio, skillGroups } from '@/data/portfolio'
 function Hero() {
   return (
     <section className="hero wrap" id="home" aria-labelledby="hero-heading">
+      <div className="hero-dragon-layer" aria-hidden="true">
+        <HeroSceneLoader />
+        <div className="scene-instruction"><span className="scene-dot" /> SKELETON DRAGON / POINTER REACTIVE</div>
+      </div>
       <div className="hero-layout">
         <div className="hero-title">
           <h1 id="hero-heading">Software<br />Developer</h1>
@@ -18,14 +22,9 @@ function Hero() {
           <p className="hero-name">{portfolio.name}</p>
           <p className="eyebrow hero-application">THIRD-YEAR IT STUDENT<br />HUFLIT · VIETNAM</p>
         </div>
-        <figure className="hero-media hero-media-3d">
-          <HeroSceneLoader />
-          <div className="hero-portrait-card">
-            <Image src="/assets/tsan-quy-vien.jpg" alt="Portrait of Quy Vien" width={180} height={240} priority />
-            <span>QV / 2026</span>
-          </div>
-          <div className="scene-instruction"><span className="scene-dot" /> MOVE TO EXPLORE</div>
-          <figcaption><span>01 / INTERACTIVE WEBGL SCULPTURE</span><span aria-hidden="true">DRAG THE PERSPECTIVE ↗</span></figcaption>
+        <figure className="hero-media">
+          <div className="hero-portrait"><Image src="/assets/tsan-quy-vien.jpg" alt="Portrait of Quy Vien" width={1536} height={2048} priority sizes="(max-width: 700px) 360px, 400px" /></div>
+          <figcaption><span>SOFTWARE DEVELOPMENT / LEARNING THROUGH PROJECTS</span><span aria-hidden="true">↗</span></figcaption>
         </figure>
         <div className="hero-intro">
           <p>{portfolio.intro}</p>
