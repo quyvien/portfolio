@@ -3,11 +3,11 @@
 import dynamic from 'next/dynamic'
 import { HeroFallback } from './HeroFallback'
 
-const HeroScene = dynamic(() => import('./HeroScene'), {
+const DragonCursor = dynamic(() => import('./DragonCursor'), {
   ssr: false,
   loading: () => <HeroFallback />,
 })
 
 export function HeroSceneLoader() {
-  return <HeroScene />
+  return <DragonCursor />
 }

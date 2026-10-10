@@ -18,9 +18,7 @@
   mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 82%, transparent 100%);
 }
 
-.hero-scene,
-.hero-scene > div,
-.hero-scene canvas,
+.dragon-cursor,
 .hero-scene-fallback {
   position: absolute !important;
   inset: 0;
@@ -28,12 +26,38 @@
   height: 100% !important;
 }
 
-.hero-scene canvas {
-  opacity: .34;
-  filter: saturate(.72) contrast(1.08);
+.dragon-cursor {
+  --sigil-white: #f8f7f2;
+  --sigil-cold: #20211f;
+  --sigil-hot: #b20f2d;
+  overflow: visible;
+  opacity: .52;
+  filter: contrast(1.18) drop-shadow(0 0 8px color-mix(in srgb, #b20f2d 34%, transparent));
 }
 
-:root[data-theme=dark] .hero-scene canvas { opacity: .48; }
+:root[data-theme=dark] .dragon-cursor {
+  --sigil-white: #ffffff;
+  --sigil-cold: #aeb2bc;
+  --sigil-hot: #ee2147;
+  opacity: .7;
+}
+
+.dragon-bone {
+  fill: color-mix(in srgb, var(--paper) 78%, transparent);
+  stroke: url(#dragon-bone);
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.dragon-head { stroke-width: 2.15; }
+.dragon-vertebra circle { fill: var(--sigil-hot); stroke: none; opacity: .9; }
+.dragon-membrane { fill: none; opacity: .42; stroke-width: .8; }
+.dragon-sigil-line { fill: none; stroke: var(--sigil-hot); opacity: .8; stroke-width: 1; }
+.dragon-eye { fill: var(--sigil-hot); stroke: none; filter: url(#dragon-glow); }
+.dragon-eye-dim { opacity: .35; }
+.dragon-tail { stroke-width: 1.25; }
 
 .scene-instruction {
   position: absolute;

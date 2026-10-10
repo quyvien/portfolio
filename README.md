@@ -1,12 +1,12 @@
 # Quy Vien Portfolio
 
-A static-exported portfolio built with Next.js, TypeScript, and React Three Fiber. The visual system from the original HTML/CSS site is preserved while the runtime is split into server-rendered content and small client-side interaction boundaries.
+A static-exported portfolio built with Next.js and TypeScript. The visual system from the original HTML/CSS site is preserved while the runtime is split into server-rendered content and small client-side interaction boundaries.
 
 ## Stack
 
 - Next.js 16 App Router
 - React 19 and TypeScript (strict mode)
-- Three.js, React Three Fiber, and Drei
+- SVG animation driven by `requestAnimationFrame`
 - Static export for deployment to any static host
 
 ## Local development
@@ -34,23 +34,21 @@ The production build is written to `out/`. It can be uploaded to any host that s
 app/
   layout.tsx       Metadata, global styles, and theme bootstrap
   page.tsx         Server-rendered portfolio sections
-  three.css        3D scene presentation and fallback styles
+  three.css        Dragon cursor presentation and fallback styles
 components/
   Header.tsx       Menu, theme, and active-section behavior
-  HeroScene.tsx    Interactive WebGL sculpture
+  DragonCursor.tsx Segmented SVG dragon following the pointer
   HeroSceneLoader.tsx
-  HeroFallback.tsx Reduced-motion and WebGL fallback
+  HeroFallback.tsx Reduced-motion fallback
   MotionController.tsx
 data/
   portfolio.ts     Portfolio content and typed collections
 public/assets/     Images, fonts, and illustrations
 ```
 
-## 3D behavior
+## Dragon cursor behavior
 
-The hero sculpture is dynamically loaded on the client so Three.js does not enter the initial server-rendered content bundle. It reacts gently to pointer position, caps device pixel ratio, avoids shadows and remote environment maps, and displays a CSS fallback when reduced motion is enabled or WebGL is unavailable.
-
-Keep future `.glb` models in `public/models/`. Compress large meshes and textures before adding them; mobile performance takes priority over polygon count or post-processing.
+The hero background uses an original SVG skeleton assembled from a head, wings, ribs, and vertebrae. A lightweight segment-chain animation makes each part follow the one ahead of it, producing a fluid dragon motion toward the pointer. When the pointer is idle, the dragon slowly patrols the hero. Reduced-motion visitors receive a static line-art fallback.
 
 ## Content updates
 
