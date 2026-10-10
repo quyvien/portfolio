@@ -9,7 +9,7 @@ function Hero() {
     <section className="hero wrap" id="home" aria-labelledby="hero-heading">
       <div className="hero-dragon-layer" aria-hidden="true">
         <HeroSceneLoader />
-        <div className="scene-instruction"><span className="scene-dot" /> CYBER SIGIL DRAGON / POINTER REACTIVE</div>
+        <div className="scene-instruction"><span className="scene-dot" /> DRAGON CURSOR / POINTER REACTIVE</div>
       </div>
       <div className="hero-layout">
         <div className="hero-title">

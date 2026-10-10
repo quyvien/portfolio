@@ -48,8 +48,15 @@ public/assets/     Images, fonts, and illustrations
 
 ## Dragon cursor behavior
 
-The hero background uses an original SVG skeleton assembled from a head, wings, ribs, and vertebrae. A lightweight segment-chain animation makes each part follow the one ahead of it, producing a fluid dragon motion toward the pointer. When the pointer is idle, the dragon slowly patrols the hero. Reduced-motion visitors receive a static line-art fallback.
+The hero background adapts the credited `Dragon-Cursor` SVG artwork into a
+React component. Its original 40-part segment chain follows the pointer and
+returns to an idle orbit when interaction stops. The palette automatically
+switches between black and white with the site theme, while reduced-motion
+visitors receive a static line-art fallback.
 
 ## Content updates
+
+Third-party artwork and source acknowledgements are listed in
+[`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
 
 Edit `data/portfolio.ts` for identity, navigation, skills, and mentoring media. Edit the semantic section copy in `app/page.tsx`. Existing legacy HTML and JavaScript files remain in the repository only as migration reference and are not used by the Next.js build.

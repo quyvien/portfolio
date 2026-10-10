@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useSyncExternalStore } from 'react'
 
-const SEGMENT_COUNT = 34
+const SEGMENT_COUNT = 40
 const VIEWBOX_WIDTH = 1200
 const VIEWBOX_HEIGHT = 620
+
+type Point = { x: number; y: number }
 
 const subscribeToReducedMotion = (callback: () => void) => {
   const query = matchMedia('(prefers-reduced-motion: reduce)')
@@ -14,8 +16,8 @@ const subscribeToReducedMotion = (callback: () => void) => {
 
 const getReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 
-type Point = { x: number; y: number }
-
+// Artwork and motion adapted with permission from:
+// https://github.com/bhurtel-manish16/short-vidoes/tree/main/Dragon-Cursor
 export default function DragonCursor() {
   const segmentRefs = useRef<Array<SVGUseElement | null>>([])
   const svgRef = useRef<SVGSVGElement>(null)
@@ -24,56 +26,50 @@ export default function DragonCursor() {
   useEffect(() => {
     if (reducedMotion) return
 
-    const points: Point[] = Array.from({ length: SEGMENT_COUNT }, (_, index) => ({
-      x: VIEWBOX_WIDTH * 0.77 - index * 22,
-      y: VIEWBOX_HEIGHT * 0.42,
+    const points: Point[] = Array.from({ length: SEGMENT_COUNT }, () => ({
+      x: VIEWBOX_WIDTH / 2,
+      y: 0,
     }))
-    const pointer = { x: VIEWBOX_WIDTH * 0.77, y: VIEWBOX_HEIGHT * 0.42 }
-    let lastPointerMove = performance.now()
+    const pointer = { x: VIEWBOX_WIDTH / 2, y: VIEWBOX_HEIGHT / 2 }
+    const maxRadius = Math.min(pointer.x, pointer.y) - 20
+    let phase = Math.random()
+    let radius = 0
     let frame = 0
-    let phase = Math.random() * Math.PI * 2
 
     const trackPointer = (event: PointerEvent) => {
       const rect = svgRef.current?.getBoundingClientRect()
       if (!rect?.width || !rect.height) return
       pointer.x = ((event.clientX - rect.left) / rect.width) * VIEWBOX_WIDTH
       pointer.y = ((event.clientY - rect.top) / rect.height) * VIEWBOX_HEIGHT
-      lastPointerMove = performance.now()
+      radius = 0
     }
 
-    const animate = (time: number) => {
-      const idle = time - lastPointerMove > 1300
-      const targetX = idle ? VIEWBOX_WIDTH * 0.62 + Math.cos(phase * 1.7) * 250 : pointer.x
-      const targetY = idle ? VIEWBOX_HEIGHT * 0.45 + Math.sin(phase * 2.1) * 145 : pointer.y
-      points[0].x += (targetX - points[0].x) * 0.105
-      points[0].y += (targetY - points[0].y) * 0.105
+    const animate = () => {
+      const lead = points[0]
+      const orbitX = (Math.cos(3 * phase) * radius * VIEWBOX_WIDTH) / VIEWBOX_HEIGHT
+      const orbitY = (Math.sin(4 * phase) * radius * VIEWBOX_HEIGHT) / VIEWBOX_WIDTH
+      lead.x += (orbitX + pointer.x - lead.x) / 10
+      lead.y += (orbitY + pointer.y - lead.y) / 10
 
       for (let index = 1; index < SEGMENT_COUNT; index += 1) {
         const current = points[index]
         const previous = points[index - 1]
         const angle = Math.atan2(current.y - previous.y, current.x - previous.x)
-        const spacing = Math.max(8, 29 - index * 0.48)
-        const targetSegmentX = previous.x + Math.cos(angle) * spacing
-        const targetSegmentY = previous.y + Math.sin(angle) * spacing
-        current.x += (targetSegmentX - current.x) * 0.38
-        current.y += (targetSegmentY - current.y) * 0.38
+        current.x += (previous.x - current.x + (Math.cos(angle) * (100 - index)) / 5) / 4
+        current.y += (previous.y - current.y + (Math.sin(angle) * (100 - index)) / 5) / 4
+        const scale = (162 + 4 * (1 - index)) / 50
+        segmentRefs.current[index]?.setAttribute(
+          'transform',
+          `translate(${((previous.x + current.x) / 2).toFixed(2)} ${((previous.y + current.y) / 2).toFixed(2)}) rotate(${((180 / Math.PI) * angle).toFixed(2)}) scale(${scale.toFixed(3)})`,
+        )
       }
 
-      segmentRefs.current.forEach((element, index) => {
-        if (!element) return
-        const current = points[index]
-        const next = points[Math.min(index + 1, SEGMENT_COUNT - 1)]
-        const angle = Math.atan2(current.y - next.y, current.x - next.x) * (180 / Math.PI)
-        const scale = 1.08 - index * 0.018
-        const wave = Math.sin(phase * 2.2 - index * 0.42) * Math.min(index * 0.28, 4.5)
-        element.setAttribute(
-          'transform',
-          `translate(${current.x.toFixed(2)} ${(current.y + wave).toFixed(2)}) rotate(${angle.toFixed(2)}) scale(${Math.max(scale, 0.48).toFixed(3)})`,
-        )
-        element.style.opacity = String(Math.max(0.18, 0.9 - index * 0.019))
-      })
-
-      phase += 0.006
+      if (radius < maxRadius) radius += 1
+      phase += 0.003
+      if (radius > 60) {
+        pointer.x += (VIEWBOX_WIDTH / 2 - pointer.x) * 0.05
+        pointer.y += (VIEWBOX_HEIGHT / 2 - pointer.y) * 0.05
+      }
       frame = requestAnimationFrame(animate)
     }
 
@@ -85,66 +81,55 @@ export default function DragonCursor() {
     }
   }, [reducedMotion])
 
+  const segments = Array.from({ length: SEGMENT_COUNT - 1 }, (_, offset) => SEGMENT_COUNT - 1 - offset)
+
   return (
     <svg
       ref={svgRef}
-      className="dragon-cursor"
+      className="dragon-cursor dragon-source"
       viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="dragon-bone" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="var(--sigil-white)" />
-          <stop offset=".48" stopColor="var(--sigil-cold)" />
-          <stop offset="1" stopColor="var(--sigil-hot)" />
-        </linearGradient>
-        <filter id="dragon-glow" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="3.5" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-        <g id="dragon-head" className="dragon-bone dragon-head">
-          <path d="M-50 0-31-12-39-31-13-23 2-34 11-17 35-12 52 0 35 12 11 17 2 34-13 23-39 31-31 12Z" />
-          <path d="M-31-12-56-55-12-29M-31 12-56 55-12 29M2-34 22-54 16-23M2 34l20 20-6-31" />
-          <path d="M-18-8 4 0-18 8M3-9 36-5 49 0 36 5 3 9M-30 0H42" />
-          <path d="m-9-22-8 22 8 22M20-13 30 0 20 13" className="dragon-sigil-line" />
-          <circle cx="12" cy="-8" r="3.6" className="dragon-eye" />
-          <circle cx="12" cy="8" r="3.6" className="dragon-eye dragon-eye-dim" />
-          <path d="m34-6 9-13-1 16M34 6l9 13-1-16" />
+        <g id="dragon-source-head">
+          <path className="dragon-source-light" d="M-28.9,-1.1L-28.55 -1.95Q-28.1 -3.1 -27.25 -2.95L-26.7 -2.95Q-27.7 -1.65 -28.9 -1.1M-18.35,-1.8Q-15.1 -10.3 -9.6 -6.05Q-15.1 -6.2 -18.35 -1.8M-18.35,1.1Q-15.1 5.45 -9.6 5.35Q-15.1 9.55 -18.35 1.1M-26.7,2.2L-27.25 2.25Q-28.1 2.4 -28.55 1.2L-28.9 0.35Q-27.7 0.9 -26.7 2.2" />
+          <path className="dragon-source-ink" d="M-21.05,-8.25Q-13.6 -15.95 -1.3 -12.1Q-7.85 -8.5 -5.85 -4.35Q-2.3 -4.85 10.5 0.15Q0 4.35 -5.85 3.65Q-7.85 7.75 -1.25 12.45Q-13.6 15.2 -21.05 7.5Q-29.55 4.05 -30.2 -0.35Q-29.55 -4.8 -21.05 -8.25M-26.7,-2.95L-27.25 -2.95Q-28.1 -3.1 -28.55 -1.95L-28.9 -1.1Q-27.7 -1.65 -26.7 -2.95M-9.6,-6.05Q-15.1 -10.3 -18.35 -1.8Q-15.1 -6.2 -9.6 -6.05M-9.6,5.35Q-15.1 5.45 -18.35 1.1Q-15.1 9.55 -9.6 5.35M-28.9,0.35L-28.55 1.2Q-28.1 2.4 -27.25 2.25L-26.7 2.2Q-27.7 0.9 -28.9 0.35" />
         </g>
-        <g id="dragon-vertebra" className="dragon-bone dragon-vertebra">
-          <path d="M-20 0-9-8 0-4 9-8 20 0 9 8 0 4-9 8Z" />
-          <path d="M-11-7-5-24 1-8 8-19 11-5M-11 7-5 24 1 8 8 19 11 5" />
-          <path d="m-4-11 4 7 4-7M-4 11l4-7 4 7" className="dragon-sigil-line" />
-          <circle cx="0" cy="0" r="2.8" />
+        <g id="dragon-source-fins">
+          <linearGradient id="dragon-source-fin-gradient" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.0935974, 0, 0, 0.188782, -20.55, 0)" x1="-819.2" y1="0" x2="819.2" y2="0">
+            <stop offset="0" stopColor="var(--dragon-soft)" />
+            <stop offset="1" stopColor="var(--dragon-ink)" />
+          </linearGradient>
+          <path fill="url(#dragon-source-fin-gradient)" d="M29.75,-36.85Q-17.75 -61.45 -42.05 -40.95L-45.35 -38.35L-53.7 -41.15L-51.15 -44.85Q-34.85 -68.4 21 -57.8Q-32.2 -72.1 -50.25 -50Q-53.85 -45.65 -56.05 -41.95L-64.7 -43.35L-60.6 -50.3Q-45.9 -75.55 5.1 -79.35Q-2.2 -79.8 -9.45 -79.15Q-16.2 -78.55 -22.85 -77.15Q-29.85 -75.65 -36.5 -73Q-43.05 -70.4 -48.8 -66.85Q-54.55 -63.35 -56.8 -60.3L-60.5 -55.4Q-62.95 -52.1 -67 -43.55L-70.55 -43.55L-76.35 -42.95Q-74.6 -49.1 -71.85 -54.85Q-68.9 -61.25 -64.8 -67.1Q-60.8 -73 -55.45 -77.55Q-49.9 -82.35 -43.65 -85.85L-30.6 -92.7Q-24.05 -95.95 -17 -98.25Q-63.75 -86.35 -73.65 -57.1Q-75.75 -50.75 -77.45 -42.75Q-82.9 -41.75 -88 -39.65Q-87.65 -46.65 -86.3 -53.05Q-79.8 -89.8 -36.65 -117.2Q-80.65 -94.5 -87.55 -59.55Q-88.65 -54.15 -88.95 -39.4L-89.8 -38.85L-92.7 -37.6Q-93.75 -44.35 -94.1 -51.15Q-94.4 -58.2 -93.25 -65.1Q-92.15 -72.5 -90.05 -79.65Q-88.05 -86.55 -85 -93Q-82.1 -99.3 -78.45 -105.15Q-74.6 -111.35 -70.25 -117.25Q-65.95 -123.1 -61.1 -128.55Q-70.3 -119.35 -77.9 -108.7Q-86 -97.3 -90.8 -84.05Q-95.8 -70.5 -96 -56.15Q-96.1 -46 -94.05 -36.05L-93.25 -31.55Q-93.5 -35.65 -92.35 -36Q-79.85 -42 -66.6 -40.45Q-52.45 -38.85 -39.2 -33.25Q-28.3 -29.9 -21.25 -24.15Q-17.8 -23.3 -8.6 -15.6Q-12.1 -20.75 -16.75 -24.5Q-24.55 -30.7 -34.25 -34.05L-42.55 -37Q-38.9 -41.25 -31.5 -43.25Q-24.05 -45.3 -16.2 -46.3Q-8.35 -47.35 -1 -46Q5.95 -44.75 12.75 -42.85Q19.85 -40.9 29.75 -36.85M-92.45,-27.35L-94.95 -36.25Q-109.7 -105 -27.95 -154.65Q-98.65 -103.8 -91.75 -39.4L-89.95 -40.2Q-92.2 -105.25 -5.6 -130.9Q-78.8 -99.95 -87.45 -40.9Q-83.15 -42.95 -78.45 -43.95Q-70 -101.3 17.65 -103.8Q-56.9 -93.4 -74.5 -44.55L-67.4 -45.45Q-49.1 -94.95 39.25 -75.65Q-36.75 -84.35 -62.25 -44.25L-57.3 -43.6Q-31.65 -86.5 56.15 -46.05Q-20.3 -73.35 -51.35 -41.7L-45.95 -39.75Q-17.85 -71.35 51.85 -24.8Q-8.7 -56.4 -39.75 -37.05Q-28.15 -34.05 -14.25 -24.45Q-8.6 -19.85 -5.8 -16.95Q5.95 -2.4 20 0Q5.95 2.4 -5.8 16.95Q-8.6 19.85 -14.25 24.45Q-28.15 34.05 -39.75 37.05Q-8.7 56.4 51.85 24.8Q-17.85 71.35 -45.95 39.75L-51.35 41.7Q-20.3 73.35 56.15 46.1Q-31.65 86.5 -57.3 43.65L-62.25 44.3Q-36.75 84.35 39.25 75.7Q-49.1 94.95 -67.4 45.5L-74.5 44.6Q-56.9 93.4 17.65 103.85Q-70 101.3 -78.45 43.95Q-83.15 42.95 -87.45 40.9Q-78.8 99.95 -5.6 130.9Q-92.2 105.25 -89.95 40.25L-91.75 39.4Q-98.65 103.8 -27.95 154.65Q-109.7 105 -94.95 36.3L-92.45 27.35Q-93.05 33.9 -92.05 34.75Q-91.1 35.55 -88.95 36.7L-87.95 37Q-83.7 38.25 -79.05 38.8L-77.25 38.95Q-72.55 39.3 -67.5 38.85L-65.45 38.65Q-44.4 36.05 -17.8 19.6Q-9.9 12.8 -15.15 4.4Q-18.15 3.15 -19 0Q-18.15 -3.15 -15.15 -4.4Q-9.9 -12.8 -17.8 -19.6L-17.8 -19.55Q-44.4 -36.05 -65.45 -38.6L-67.5 -38.8Q-72.55 -39.3 -77.25 -38.95L-79.05 -38.75Q-83.7 -38.25 -87.95 -36.95L-88.95 -36.65Q-91.1 -35.55 -92.05 -34.7Q-93.05 -33.9 -92.45 -27.35M-8.6,15.6Q-17.8 23.3 -21.25 24.2Q-28.3 29.9 -39.2 33.3Q-52.45 38.85 -66.6 40.5Q-79.85 42 -92.35 36Q-93.5 35.65 -93.25 31.55L-94.05 36.1Q-96.1 46.05 -96 56.15Q-95.8 70.5 -90.8 84.1Q-86 97.3 -77.9 108.75Q-70.3 119.35 -61.1 128.6Q-65.95 123.1 -70.25 117.25Q-74.6 111.35 -78.45 105.15Q-82.1 99.3 -85 93Q-88.05 86.55 -90.05 79.7Q-92.15 72.5 -93.25 65.1Q-94.4 58.2 -94.1 51.2Q-93.75 44.35 -92.7 37.6L-89.8 38.9L-88.95 39.45Q-88.65 54.15 -87.55 59.55Q-80.65 94.5 -36.65 117.25Q-79.8 89.8 -86.3 53.1Q-87.65 46.65 -88 39.65Q-82.9 41.75 -77.45 42.75Q-75.75 50.75 -73.65 57.15Q-63.75 86.35 -17 98.3Q-24.05 95.95 -30.6 92.75L-43.65 85.9Q-49.9 82.35 -55.45 77.6Q-60.8 73 -64.8 67.15Q-68.9 61.25 -71.85 54.85Q-74.6 49.1 -76.35 42.95L-70.55 43.6L-67 43.6Q-62.95 52.1 -60.5 55.4L-56.8 60.35Q-54.55 63.35 -48.8 66.9Q-43.05 70.4 -36.5 73Q-29.85 75.65 -22.85 77.15Q-16.2 78.55 -9.45 79.15Q-2.2 79.8 5.1 79.35Q-45.9 75.55 -60.6 50.3L-64.7 43.4L-56.05 41.95Q-53.85 45.65 -50.25 50Q-32.2 72.1 21 57.85Q-34.85 68.4 -51.15 44.85L-53.7 41.2L-45.35 38.35L-42.05 40.95Q-17.75 61.45 29.75 36.85Q19.85 40.9 12.75 42.9Q5.95 44.75 -1 46Q-8.35 47.35 -16.2 46.35Q-24.05 45.3 -31.5 43.3Q-38.9 41.25 -42.55 37.05L-34.25 34.05Q-24.55 30.7 -16.75 24.5Q-12.1 20.75 -8.6 15.6" />
         </g>
-        <g id="dragon-rib" className="dragon-bone dragon-rib">
-          <path d="M-20 0-9-8 0-4 9-8 20 0 9 8 0 4-9 8Z" />
-          <path d="M-8-6-24-27-51-31-34-42M0-7-10-42-34-59-22-34M8-6 7-35-9-64" />
-          <path d="M-8 6-24 27-51 31-34 42M0 7-10 42-34 59-22 34M8 6 7 35-9 64" />
-          <path d="M-51-31-34-59-9-64M-51 31-34 59-9 64" className="dragon-membrane" />
-        </g>
-        <g id="dragon-wing" className="dragon-bone dragon-wing">
-          <path d="M16 0-7-34-55-77M9-3-34-91-108-112M2 0-64-67-128-57M-6 5-69-29-120 7" />
-          <path d="M-55-77-108-112-128-57-120 7M16 0-55-77M16 0-128-57M16 0-120 7" className="dragon-membrane" />
-          <path d="m-108-112 14 29-34 26 31 8-23 36M-16 0-7-10 6-7 18 0 6 7-7 10Z" />
-          <path d="M-44-63-35-45-64-39M-82-84-71-64-99-59" className="dragon-sigil-line" />
-        </g>
-        <g id="dragon-tail" className="dragon-bone dragon-tail">
-          <path d="M-21 0-7-7 7 0-7 7Z" />
-          <path d="M-9-5-3-20 2-6M-9 5-3 20 2 6M7 0l17-12-7 12 7 12Z" />
+        <g id="dragon-source-spine">
+          <linearGradient id="dragon-source-spine-top" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.0229492, 0, 0, -0.0152893, 0, 0.05)" x1="-819.2" y1="0" x2="819.2" y2="0">
+            <stop offset="0" stopColor="var(--dragon-soft)" />
+            <stop offset="1" stopColor="var(--dragon-ink)" />
+          </linearGradient>
+          <linearGradient id="dragon-source-spine-bottom" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.0229492, 0, 0, 0.0152893, 0, -0.05)" x1="-819.2" y1="0" x2="819.2" y2="0">
+            <stop offset="0" stopColor="var(--dragon-soft)" />
+            <stop offset="1" stopColor="var(--dragon-ink)" />
+          </linearGradient>
+          <path fill="url(#dragon-source-spine-top)" d="M-18.8,0Q-17.85 -5.7 -12.3 -9.6Q-11.2 -5.35 -6.5 -8.25L-6.45 -8.2L-6.2 -8.3Q1.25 -16.25 6.65 -12.4Q0.05 -12.55 0 -5.95Q2.7 -2.4 7.75 -4.1Q18 -1.45 18.8 0L-18.8 0" />
+          <path fill="url(#dragon-source-spine-bottom)" d="M18.8,0Q18 1.45 7.75 4.1Q2.7 2.4 0 5.95Q0.05 12.55 6.65 12.4Q1.25 16.25 -6.2 8.35Q-6.35 8.25 -6.45 8.25L-6.5 8.25Q-11.2 5.35 -12.3 9.6Q-17.85 5.7 -18.8 0L18.8 0" />
         </g>
       </defs>
-      <g className="dragon-chain">
-        {Array.from({ length: SEGMENT_COUNT }, (_, index) => {
-          const part = index === 0 ? 'dragon-head' : index === 7 || index === 13 ? 'dragon-wing' : index < 19 && index % 3 === 0 ? 'dragon-rib' : index > 28 ? 'dragon-tail' : 'dragon-vertebra'
-          const initialX = VIEWBOX_WIDTH * 0.77 - index * 22
+      <g>
+        {segments.map((index) => {
+          const part = index === 1
+            ? 'dragon-source-head'
+            : index === 8 || index === 14
+              ? 'dragon-source-fins'
+              : 'dragon-source-spine'
+          const scale = (162 + 4 * (1 - index)) / 50
           return (
             <use
               key={index}
               ref={(element) => { segmentRefs.current[index] = element }}
               href={`#${part}`}
-              transform={`translate(${initialX} ${VIEWBOX_HEIGHT * 0.42}) scale(${Math.max(1.08 - index * 0.018, 0.48)})`}
+              transform={`translate(${VIEWBOX_WIDTH / 2 - index * 18} ${VIEWBOX_HEIGHT / 2}) scale(${scale})`}
             />
           )
         })}
