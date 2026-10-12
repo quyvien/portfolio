@@ -5,6 +5,9 @@ import { useEffect, useRef, useSyncExternalStore } from 'react'
 const SEGMENT_COUNT = 40
 const VIEWBOX_WIDTH = 1200
 const VIEWBOX_HEIGHT = 620
+const DRAGON_SCALE = 0.92
+
+const getSegmentScale = (index: number) => ((162 + 4 * (1 - index)) / 50) * DRAGON_SCALE
 
 type Point = { x: number; y: number }
 
@@ -57,7 +60,7 @@ export default function DragonCursor() {
         const angle = Math.atan2(current.y - previous.y, current.x - previous.x)
         current.x += (previous.x - current.x + (Math.cos(angle) * (100 - index)) / 5) / 4
         current.y += (previous.y - current.y + (Math.sin(angle) * (100 - index)) / 5) / 4
-        const scale = (162 + 4 * (1 - index)) / 50
+        const scale = getSegmentScale(index)
         segmentRefs.current[index]?.setAttribute(
           'transform',
           `translate(${((previous.x + current.x) / 2).toFixed(2)} ${((previous.y + current.y) / 2).toFixed(2)}) rotate(${((180 / Math.PI) * angle).toFixed(2)}) scale(${scale.toFixed(3)})`,
@@ -123,7 +126,7 @@ export default function DragonCursor() {
             : index === 8 || index === 14
               ? 'dragon-source-fins'
               : 'dragon-source-spine'
-          const scale = (162 + 4 * (1 - index)) / 50
+          const scale = getSegmentScale(index)
           return (
             <use
               key={index}
