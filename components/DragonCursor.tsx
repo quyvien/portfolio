@@ -38,6 +38,18 @@ export default function DragonCursor() {
     let phase = Math.random()
     let radius = 0
     let frame = 0
+    let isVisible = true
+
+    const stopAnimation = () => {
+      cancelAnimationFrame(frame)
+      frame = 0
+    }
+
+    const scheduleAnimation = () => {
+      if (!frame && isVisible && !document.hidden) {
+        frame = requestAnimationFrame(animate)
+      }
+    }
 
     const trackPointer = (event: PointerEvent) => {
       const rect = svgRef.current?.getBoundingClientRect()
@@ -48,6 +60,9 @@ export default function DragonCursor() {
     }
 
     const animate = () => {
+      frame = 0
+      if (!isVisible || document.hidden) return
+
       const lead = points[0]
       const orbitX = (Math.cos(3 * phase) * radius * VIEWBOX_WIDTH) / VIEWBOX_HEIGHT
       const orbitY = (Math.sin(4 * phase) * radius * VIEWBOX_HEIGHT) / VIEWBOX_WIDTH
@@ -73,14 +88,33 @@ export default function DragonCursor() {
         pointer.x += (VIEWBOX_WIDTH / 2 - pointer.x) * 0.05
         pointer.y += (VIEWBOX_HEIGHT / 2 - pointer.y) * 0.05
       }
-      frame = requestAnimationFrame(animate)
+      scheduleAnimation()
+    }
+
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry?.isIntersecting ?? false
+        if (isVisible) scheduleAnimation()
+        else stopAnimation()
+      },
+      { rootMargin: '120px' },
+    )
+    const svg = svgRef.current
+    if (svg) visibilityObserver.observe(svg)
+
+    const onVisibilityChange = () => {
+      if (document.hidden) stopAnimation()
+      else scheduleAnimation()
     }
 
     window.addEventListener('pointermove', trackPointer, { passive: true })
-    frame = requestAnimationFrame(animate)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    scheduleAnimation()
     return () => {
+      visibilityObserver.disconnect()
       window.removeEventListener('pointermove', trackPointer)
-      cancelAnimationFrame(frame)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      stopAnimation()
     }
   }, [reducedMotion])
 
